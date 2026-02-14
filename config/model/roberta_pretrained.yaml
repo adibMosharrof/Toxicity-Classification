@@ -1,0 +1,3 @@
+name: s-nlp/roberta_toxicity_classifier
+backbone_type: bert
+threshold: 0.5
