@@ -19,7 +19,7 @@ from tqdm import tqdm
 from torch.utils.data import DataLoader
 from transformers import AutoTokenizer
 
-from src.datamodule import InferenceDataModule
+from src.datamodule import JigsawDataModule
 from src.inference.metrics import MetricsCalculator
 
 
@@ -49,9 +49,9 @@ class InferenceEngine:
         self.device = self.accelerator.device
         self.metrics_calculator = MetricsCalculator()
 
-    def init_datamodule(self, tokenizer) -> InferenceDataModule:
+    def init_datamodule(self, tokenizer) -> JigsawDataModule:
         """
-        Initialize inference datamodule.
+        Initialize datamodule.
 
         Args:
             tokenizer: Tokenizer for encoding text
@@ -59,7 +59,7 @@ class InferenceEngine:
         Returns:
             Initialized datamodule
         """
-        datamodule = InferenceDataModule(
+        datamodule = JigsawDataModule(
             tokenizer=tokenizer,
             batch_size=self.batch_size,
             max_length=self.max_length,
@@ -116,7 +116,7 @@ class InferenceEngine:
         self,
         test_data_path: str,
         model,
-        datamodule: InferenceDataModule,
+        datamodule: JigsawDataModule,
     ) -> Tuple[Dict[str, float], pd.DataFrame, pd.DataFrame]:
         """
         Run inference and calculate metrics.
@@ -132,7 +132,7 @@ class InferenceEngine:
         logger = logging.getLogger(__name__)
         
         # Prepare dataloader using datamodule
-        dataloader, df = datamodule.prepare_dataloader(test_data_path)
+        dataloader, df = datamodule.prepare_test_dataloader(test_data_path)
 
         logger.info("Running inference")
         predictions, probabilities, true_labels = self.run_inference(dataloader, model)
