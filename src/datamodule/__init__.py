@@ -1,6 +1,5 @@
 """Data modules for different tasks."""
 
-from src.datamodule.base import BaseDataModule
-from src.datamodule.inference_datamodule import InferenceDataModule
+from src.datamodule.jigsaw_datamodule import JigsawDataModule
 
-__all__ = ["BaseDataModule", "InferenceDataModule"]
+__all__ = ["JigsawDataModule"]

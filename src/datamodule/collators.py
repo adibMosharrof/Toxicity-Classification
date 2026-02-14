@@ -5,8 +5,8 @@ from typing import Dict, List
 import torch
 
 
-class InferenceCollator:
-    """Custom collator for inference that preserves label and id fields."""
+class JigsawCollator:
+    """Custom collator for Jigsaw datasets that preserves label and id fields."""
 
     def __init__(self, tokenizer):
         """
