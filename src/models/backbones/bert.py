@@ -23,7 +23,7 @@ class BertBackbone(nn.Module):
         self.model_name = model_name
         self.model = AutoModelForSequenceClassification.from_pretrained(
             model_name,
-            use_safetensors=False,
+            use_safetensors=True,
             trust_remote_code=True,  # Bypass torch.load security check for older torch versions
         )
     

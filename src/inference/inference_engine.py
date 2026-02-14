@@ -163,6 +163,8 @@ class InferenceEngine:
         backbone_type: str = "bert",
         threshold: float = 0.5,
         output_dir: Path = None,
+        path: str = None,
+        project_root: str = None,
     ) -> None:
         """
         Execute the full inference pipeline.
@@ -173,6 +175,9 @@ class InferenceEngine:
             backbone_type: Type of backbone to use (default: "bert")
             threshold: Binary classification threshold (default: 0.5)
             output_dir: Output directory to save results
+            path: Optional path to local trained model. If provided, loads from this path
+                  instead of model_name for HuggingFace models.
+            project_root: Project root directory for resolving relative paths
         """
         logger = logging.getLogger(__name__)
         logger.info("Starting inference pipeline")
@@ -187,6 +192,8 @@ class InferenceEngine:
             model_name=model_name,
             backbone_type=backbone_type,
             threshold=threshold,
+            path=path,
+            project_root=project_root,
         )
         
         # Initialize datamodule with tokenizer
@@ -282,6 +289,8 @@ def main(cfg: DictConfig) -> None:
         backbone_type=cfg.model.backbone_type,
         threshold=cfg.model.threshold,
         output_dir=output_dir,
+        path=cfg.model.get("path", None),  # Optional path for trained models
+        project_root=cfg.project_root,
     )
 
 
