@@ -1,0 +1,23 @@
+# Inference Configuration
+defaults:
+  - _self_
+  # - model: distilbert
+  - model: roberta_pretrained
+
+hydra:
+  run:
+    dir: outputs/inference/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  
+project_root: /u/siddique-d1/adib/jigsaw
+# Data settings
+data:
+  directory: outputs/data_prep/2026-02-14/05-36-32
+  test_file: test_split.csv
+  
+# Inference settings
+inference:
+  batch_size: 32
+  max_length: 512
+
+# Random seed for reproducibility
+random_seed: 42
