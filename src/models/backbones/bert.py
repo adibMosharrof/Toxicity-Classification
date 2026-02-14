@@ -24,6 +24,7 @@ class BertBackbone(nn.Module):
         self.model = AutoModelForSequenceClassification.from_pretrained(
             model_name,
             use_safetensors=False,
+            trust_remote_code=True,  # Bypass torch.load security check for older torch versions
         )
     
     def forward(self, input_ids, attention_mask):
