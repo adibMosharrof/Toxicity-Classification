@@ -37,5 +37,14 @@ wandb:
   notes: "Training distilbert model for toxicity classification"
   tags: ["toxicity", "classification", "distilbert"]
 
+# Run inference on test set after training
+should_run_inference: true
+
+# Inference settings (used for post-training evaluation)
+inference:
+  batch_size: 32
+  max_length: 512
+  threshold: 0.5
+
 # Random seed for reproducibility
 random_seed: 42

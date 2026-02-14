@@ -19,6 +19,7 @@ from transformers import AutoTokenizer, Trainer, TrainingArguments
 
 from src.datamodule import JigsawDataModule
 from src.datamodule.collators import JigsawCollator
+from src.inference.inference_engine import InferenceEngine
 from src.models import ModelFactory
 from src.training.hf_callbacks import setup_callbacks
 
@@ -230,6 +231,60 @@ class TrainingEngine:
 
         self.logger.info("Training completed successfully!")
 
+    def run_inference(
+        self,
+        model_checkpoint_path: Path,
+        test_data_path: str,
+        project_root: str,
+        model_name: str,
+        backbone_type: str,
+        batch_size: int = 32,
+        max_length: int = 512,
+        threshold: float = 0.5,
+    ) -> None:
+        """
+        Run inference on test set using trained model checkpoint.
+
+        Args:
+            model_checkpoint_path: Path to saved model checkpoint
+            test_data_path: Path to test CSV file
+            project_root: Project root directory for path resolution
+            model_name: Model identifier (e.g., "distilbert-base-uncased")
+            backbone_type: Type of backbone to use (e.g., "bert")
+            batch_size: Batch size for inference (default: 32)
+            max_length: Max sequence length (default: 512)
+            threshold: Binary classification threshold (default: 0.5)
+        """
+        self.logger.info("Running post-training inference")
+        
+        # Initialize inference engine
+        inference_engine = InferenceEngine(
+            batch_size=batch_size,
+            max_length=max_length,
+        )
+
+        # Get output directory for inference results
+        inference_output_dir = model_checkpoint_path.parent / "inference_results"
+        inference_output_dir.mkdir(parents=True, exist_ok=True)
+
+        # Build relative path from model checkpoint for model loading
+        # model_checkpoint_path is like: outputs/training/2026-02-14/14-52-45/final_model
+        # We want to pass "outputs/training/2026-02-14/14-52-45/final_model" as the path
+        relative_model_path = str(model_checkpoint_path.relative_to(project_root))
+
+        # Run inference
+        inference_engine.run(
+            test_data_path=test_data_path,
+            model_name=model_name,
+            backbone_type=backbone_type,
+            threshold=threshold,
+            output_dir=inference_output_dir,
+            path=relative_model_path,
+            project_root=project_root,
+        )
+
+        self.logger.info("Post-training inference completed successfully!")
+
 
 def setup_logging():
     """Configure logging."""
@@ -315,6 +370,22 @@ def main(cfg: DictConfig) -> None:
         output_dir=output_dir,
         random_seed=cfg.random_seed,
     )
+
+    # Run post-training inference if enabled
+    if cfg.should_run_inference:
+        test_data_path = str(Path(cfg.project_root) / cfg.data.directory / "test_split.csv")
+        model_checkpoint_path = output_dir / "final_model"
+        
+        engine.run_inference(
+            model_checkpoint_path=model_checkpoint_path,
+            test_data_path=test_data_path,
+            project_root=cfg.project_root,
+            model_name=cfg.model.name,
+            backbone_type=cfg.model.backbone_type,
+            batch_size=cfg.inference.batch_size,
+            max_length=cfg.inference.max_length,
+            threshold=cfg.inference.threshold,
+        )
 
     # Finish wandb run if enabled
     if cfg.wandb.enabled:

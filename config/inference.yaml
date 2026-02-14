@@ -1,8 +1,8 @@
 # Inference Configuration
 defaults:
   - _self_
-  # - model: distilbert
-  - model: roberta_pretrained
+  - model: distilbert
+  # - model: roberta_pretrained
 
 hydra:
   run:

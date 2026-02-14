@@ -60,13 +60,13 @@ class InferenceCollator:
 
     def __call__(self, batch: List[Dict]) -> Dict:
         """
-        Collate batch of inference data, preserving sample IDs.
+        Collate batch of inference data, preserving sample IDs and labels if present.
 
         Args:
             batch: List of samples from dataset
 
         Returns:
-            Collated batch dict with input_ids, attention_mask, and id
+            Collated batch dict with input_ids, attention_mask, id, and optional label
         """
         # Extract fields
         input_ids = [item["input_ids"] for item in batch]
@@ -82,5 +82,10 @@ class InferenceCollator:
             "attention_mask": attention_mask_stacked,
             "id": ids,
         }
+        
+        # Labels may be present in test data for evaluation
+        if "label" in batch[0]:
+            labels = [item["label"] for item in batch]
+            result["label"] = torch.stack(labels)
 
         return result

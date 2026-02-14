@@ -1,3 +1,4 @@
 name: distilbert-base-uncased
 backbone_type: bert
 threshold: 0.5
+path: outputs/training/2026-02-14/14-52-45/final_model
