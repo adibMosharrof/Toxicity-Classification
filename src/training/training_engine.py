@@ -219,7 +219,14 @@ class TrainingEngine:
 
         # Save final model
         self.logger.info(f"Saving final model to {output_dir}")
-        trainer.save_model(str(output_dir / "final_model"))
+        final_model_dir = output_dir / "final_model"
+        final_model_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Save the underlying HuggingFace model with config
+        # model.backbone.model is the actual AutoModelForSequenceClassification
+        model.backbone.model.save_pretrained(str(final_model_dir))
+        tokenizer.save_pretrained(str(final_model_dir))
+        self.logger.info(f"Model and tokenizer saved to {final_model_dir}")
 
         self.logger.info("Training completed successfully!")
 
