@@ -2,3 +2,14 @@ name: distilbert-base-uncased
 backbone_type: bert
 threshold: 0.5
 path: outputs/training/2026-02-14/14-52-45/final_model
+max_length: 256
+
+# Training-specific hyperparameters
+train:
+  batch_size: 300
+  eval_batch_size: 600
+  gradient_accumulation_steps: 1
+
+# Inference-specific hyperparameters
+inference:
+  batch_size: 512
