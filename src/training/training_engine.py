@@ -162,6 +162,8 @@ class TrainingEngine:
         threshold: float = 0.5,
         output_dir: Path = None,
         random_seed: int = 42,
+        architecture: dict = None,
+        tokenizer_name: str = None,
     ) -> None:
         """
         Execute the full training pipeline.
@@ -174,18 +176,21 @@ class TrainingEngine:
             threshold: Binary classification threshold (default: 0.5)
             output_dir: Output directory to save results
             random_seed: Random seed for reproducibility
+            architecture: Architecture config dict for custom backbones (optional)
         """
         self.logger.info("Starting training pipeline")
 
-        # Load tokenizer
-        self.logger.info(f"Loading tokenizer for {model_name}")
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        # Load tokenizer - use tokenizer_name if available (for custom models), otherwise use model_name
+        actual_tokenizer_name = tokenizer_name if tokenizer_name else model_name
+        self.logger.info(f"Loading tokenizer for {actual_tokenizer_name}")
+        tokenizer = AutoTokenizer.from_pretrained(actual_tokenizer_name)
 
         # Create model using factory
         model = ModelFactory.create(
             model_name=model_name,
             backbone_type=backbone_type,
             threshold=threshold,
+            architecture=architecture,
         )
 
         # Initialize datamodule with tokenizer
@@ -226,9 +231,16 @@ class TrainingEngine:
         final_model_dir = output_dir / "final_model"
         final_model_dir.mkdir(parents=True, exist_ok=True)
         
-        # Save the underlying HuggingFace model with config
-        # model.backbone.model is the actual AutoModelForSequenceClassification
-        model.backbone.model.save_pretrained(str(final_model_dir))
+        # Save model - handle both HuggingFace models and custom models
+        if hasattr(model.backbone.model, 'save_pretrained'):
+            # HuggingFace model - use save_pretrained
+            model.backbone.model.save_pretrained(str(final_model_dir))
+        else:
+            # Custom model - save state_dict
+            import torch
+            torch.save(model.backbone.model.state_dict(), str(final_model_dir / "pytorch_model.bin"))
+            self.logger.info(f"Saved custom model state_dict to {final_model_dir / 'pytorch_model.bin'}")
+        
         tokenizer.save_pretrained(str(final_model_dir))
         self.logger.info(f"Model and tokenizer saved to {final_model_dir}")
 
@@ -244,6 +256,8 @@ class TrainingEngine:
         batch_size: int = 32,
         max_length: int = 512,
         threshold: float = 0.5,
+        architecture: dict = None,
+        tokenizer_name: str = None,
     ) -> None:
         """
         Run inference on test set using trained model checkpoint.
@@ -284,6 +298,8 @@ class TrainingEngine:
             output_dir=inference_output_dir,
             path=relative_model_path,
             project_root=project_root,
+            architecture=architecture,
+            tokenizer_name=tokenizer_name,
         )
 
         self.logger.info("Post-training inference completed successfully!")
@@ -373,6 +389,8 @@ def main(cfg: DictConfig) -> None:
         threshold=cfg.model.threshold,
         output_dir=output_dir,
         random_seed=cfg.random_seed,
+        architecture=dict(cfg.model.architecture) if "architecture" in cfg.model else None,
+        tokenizer_name=getattr(cfg.model, 'tokenizer_name', None),
     )
 
     # Run post-training inference if enabled
@@ -389,6 +407,8 @@ def main(cfg: DictConfig) -> None:
             batch_size=cfg.model.inference.batch_size,
             max_length=cfg.model.max_length,
             threshold=cfg.inference.threshold,
+            architecture=dict(cfg.model.architecture) if "architecture" in cfg.model else None,
+            tokenizer_name=getattr(cfg.model, 'tokenizer_name', None),
         )
 
     # Finish wandb run if enabled

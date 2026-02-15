@@ -165,6 +165,8 @@ class InferenceEngine:
         output_dir: Path = None,
         path: str = None,
         project_root: str = None,
+        architecture: dict = None,
+        tokenizer_name: str = None,
     ) -> None:
         """
         Execute the full inference pipeline.
@@ -178,13 +180,15 @@ class InferenceEngine:
             path: Optional path to local trained model. If provided, loads from this path
                   instead of model_name for HuggingFace models.
             project_root: Project root directory for resolving relative paths
+            architecture: Architecture config dict for custom backbones (optional)
         """
         logger = logging.getLogger(__name__)
         logger.info("Starting inference pipeline")
         
-        # Load tokenizer
-        logger.info(f"Loading tokenizer for {model_name}")
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        # Load tokenizer - use tokenizer_name if available (for custom models), otherwise use model_name
+        actual_tokenizer_name = tokenizer_name if tokenizer_name else model_name
+        logger.info(f"Loading tokenizer for {actual_tokenizer_name}")
+        tokenizer = AutoTokenizer.from_pretrained(actual_tokenizer_name)
         
         # Create model using factory
         from src.models import ModelFactory
@@ -194,6 +198,7 @@ class InferenceEngine:
             threshold=threshold,
             path=path,
             project_root=project_root,
+            architecture=architecture,
         )
         
         # Initialize datamodule with tokenizer
