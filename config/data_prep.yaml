@@ -14,7 +14,7 @@ splits:
 
 # Limit number of rows to work with
 # -1 or null means work with full data
-data_limit: 10000
+# data_limit: 10000
 
 # Random seed for reproducibility
 random_seed: 42

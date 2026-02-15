@@ -22,7 +22,7 @@ class SimpleDataPrep:
         val_ratio: float = 0.15,
         test_ratio: float = 0.15,
         random_seed: int = 42,
-        data_limit: int = -1,
+        data_limit: int = None,
     ):
         """
         Initialize SimpleDataPrep.
@@ -33,7 +33,7 @@ class SimpleDataPrep:
             val_ratio: Proportion of data for validation (default: 0.15)
             test_ratio: Proportion of data for testing (default: 0.15)
             random_seed: Random seed for reproducibility (default: 42)
-            data_limit: Maximum number of rows to use. -1 means use all data (default: -1)
+            data_limit: Maximum number of rows to use. None, -1, or <=0 means use all data (default: None)
         """
         self.logger = logging.getLogger(__name__)
         self.data_file = Path(data_file)
@@ -41,7 +41,7 @@ class SimpleDataPrep:
         self.val_ratio = val_ratio
         self.test_ratio = test_ratio
         self.random_seed = random_seed
-        self.data_limit = data_limit
+        self.data_limit = data_limit if data_limit and data_limit > 0 else None
 
         # Validate ratios sum to 1
         ratio_sum = train_ratio + val_ratio + test_ratio
@@ -67,7 +67,7 @@ class SimpleDataPrep:
 
         self.logger.info(f"Loading data from {self.data_file}")
 
-        if self.data_limit > 0:
+        if self.data_limit is not None:
             df = pd.read_csv(self.data_file, nrows=self.data_limit)
             self.logger.info(f"Loaded {len(df)} rows (limited to {self.data_limit})")
         else:
@@ -89,6 +89,13 @@ class SimpleDataPrep:
         # Select relevant columns
         required_cols = ['id', 'target', 'comment_text']
         df = df[required_cols].copy()
+
+        # Remove rows with missing comment_text
+        initial_rows = len(df)
+        df = df.dropna(subset=['comment_text'])
+        dropped_rows = initial_rows - len(df)
+        if dropped_rows > 0:
+            self.logger.info(f"Dropped {dropped_rows} rows with missing comment_text")
 
         # Create label column: 1 if target > 0.5, else 0
         df['label'] = (df['target'] > 0.5).astype(int)
@@ -211,7 +218,7 @@ def main(cfg: DictConfig) -> None:
         val_ratio=cfg.splits.val_ratio,
         test_ratio=cfg.splits.test_ratio,
         random_seed=cfg.random_seed,
-        data_limit=cfg.data_limit if cfg.data_limit != -1 else -1,
+        data_limit=cfg.get("data_limit", None),
     )
 
     # Get the Hydra output directory
