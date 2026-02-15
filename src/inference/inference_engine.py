@@ -269,8 +269,8 @@ def main(cfg: DictConfig) -> None:
 
     # Initialize inference engine
     engine = InferenceEngine(
-        batch_size=cfg.inference.batch_size,
-        max_length=cfg.inference.max_length,
+        batch_size=cfg.model.inference.batch_size,
+        max_length=cfg.model.max_length,
     )
 
     # Get the Hydra output directory

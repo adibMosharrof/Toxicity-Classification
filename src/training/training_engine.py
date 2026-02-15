@@ -42,6 +42,7 @@ class TrainingEngine:
         eval_steps: int = 100,
         save_steps: int = 100,
         gradient_accumulation_steps: int = 1,
+        eval_batch_size: int = 64,
     ):
         """
         Initialize TrainingEngine.
@@ -57,6 +58,7 @@ class TrainingEngine:
             eval_steps: Evaluation frequency in steps (default: 100)
             save_steps: Save frequency in steps (default: 100)
             gradient_accumulation_steps: Gradient accumulation steps (default: 1)
+            eval_batch_size: Evaluation batch size (default: 64)
         """
         self.batch_size = batch_size
         self.max_length = max_length
@@ -68,6 +70,7 @@ class TrainingEngine:
         self.eval_steps = eval_steps
         self.save_steps = save_steps
         self.gradient_accumulation_steps = gradient_accumulation_steps
+        self.eval_batch_size = eval_batch_size
         self.accelerator = Accelerator()
         self.device = self.accelerator.device
         self.logger = logging.getLogger(__name__)
@@ -117,7 +120,7 @@ class TrainingEngine:
             output_dir=str(output_dir),
             num_train_epochs=self.num_epochs,
             per_device_train_batch_size=self.batch_size,
-            per_device_eval_batch_size=self.batch_size,
+            per_device_eval_batch_size=self.eval_batch_size,
             learning_rate=self.learning_rate,
             warmup_steps=self.warmup_steps,
             weight_decay=self.weight_decay,
@@ -311,7 +314,7 @@ def main(cfg: DictConfig) -> None:
     # Initialize wandb if enabled
     if cfg.wandb.enabled:
         wandb_config = {
-            "batch_size": cfg.training.batch_size,
+            "batch_size": cfg.model.train.batch_size,
             "learning_rate": cfg.training.learning_rate,
             "num_epochs": cfg.training.num_epochs,
             "warmup_steps": cfg.training.warmup_steps,
@@ -337,8 +340,8 @@ def main(cfg: DictConfig) -> None:
 
     # Initialize training engine
     engine = TrainingEngine(
-        batch_size=cfg.training.batch_size,
-        max_length=cfg.training.max_length,
+        batch_size=cfg.model.train.batch_size,
+        max_length=cfg.model.max_length,
         num_epochs=cfg.training.num_epochs,
         learning_rate=cfg.training.learning_rate,
         warmup_steps=cfg.training.warmup_steps,
@@ -346,7 +349,8 @@ def main(cfg: DictConfig) -> None:
         early_stopping_patience=cfg.training.early_stopping_patience,
         eval_steps=cfg.training.eval_steps,
         save_steps=cfg.training.save_steps,
-        gradient_accumulation_steps=cfg.training.gradient_accumulation_steps,
+        gradient_accumulation_steps=cfg.model.train.gradient_accumulation_steps,
+        eval_batch_size=cfg.model.train.eval_batch_size,
     )
 
     # Get the Hydra output directory
@@ -382,8 +386,8 @@ def main(cfg: DictConfig) -> None:
             project_root=cfg.project_root,
             model_name=cfg.model.name,
             backbone_type=cfg.model.backbone_type,
-            batch_size=cfg.inference.batch_size,
-            max_length=cfg.inference.max_length,
+            batch_size=cfg.model.inference.batch_size,
+            max_length=cfg.model.max_length,
             threshold=cfg.inference.threshold,
         )
 
