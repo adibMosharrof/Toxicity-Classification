@@ -1,9 +1,8 @@
 # Weighted Binary Cross-Entropy Loss
 # Handles class imbalance by weighting positive class higher
 # pos_weight: weight for positive class relative to negative class
-# Example: pos_weight=0.1 means toxic class gets 0.1x weight (for imbalanced datasets)
-#          pos_weight=10 means toxic class gets 10x weight (common for rare toxic samples)
+# From data analysis: class imbalance ratio is 11.50x (non-toxic/toxic)
 type: weighted_bce
 params:
-  pos_weight: 10.0  # Adjust based on class imbalance ratio
+  pos_weight: 11.50
   reduction: mean
