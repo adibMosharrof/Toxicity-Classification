@@ -1,7 +1,9 @@
 # Training Configuration
 defaults:
   - _self_
-  - model: distilbert
+  # - model: distilbert
+  - model: custom_transformer
+  - loss: bce
 
 hydra:
   run:
@@ -22,8 +24,8 @@ training:
   warmup_steps: 500
   weight_decay: 0.01
   early_stopping_patience: 3
-  eval_steps: 30
-  save_steps: 30
+  eval_steps: 50
+  save_steps: 50
 
 # Weights & Biases (wandb) configuration
 wandb:

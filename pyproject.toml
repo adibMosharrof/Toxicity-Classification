@@ -3,11 +3,12 @@ name = "jigsaw"
 version = "0.1.0"
 description = "Robust Toxicity Classification with Custom Transformer"
 authors = [
-    {name = "Your Name"}
+    {name = "Adib Mosharrof"}
 ]
 requires-python = ">=3.11,<3.13"
 dependencies = [
     "torch (>=2.10.0,<3.0.0)",
+    "torchvision (>=0.19.0,<1.0.0)",
     "pandas (>=3.0.0,<4.0.0)",
     "numpy (>=2.4.2,<3.0.0)",
     "scikit-learn (>=1.8.0,<2.0.0)",

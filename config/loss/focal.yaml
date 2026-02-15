@@ -1,0 +1,9 @@
+# Focal Loss
+# Addresses class imbalance by down-weighting easy examples
+# alpha: weighting factor for positive class (default: 0.25)
+# gamma: focusing parameter, higher = focus more on hard examples (default: 2.0)
+type: focal
+params:
+  alpha: 0.25
+  gamma: 2.0
+  reduction: mean

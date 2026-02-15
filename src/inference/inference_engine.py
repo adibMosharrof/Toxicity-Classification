@@ -167,6 +167,7 @@ class InferenceEngine:
         project_root: str = None,
         architecture: dict = None,
         tokenizer_name: str = None,
+        loss_config: dict = None,
     ) -> None:
         """
         Execute the full inference pipeline.
@@ -199,6 +200,7 @@ class InferenceEngine:
             path=path,
             project_root=project_root,
             architecture=architecture,
+            loss_config=loss_config,
         )
         
         # Initialize datamodule with tokenizer

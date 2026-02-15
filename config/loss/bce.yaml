@@ -1,0 +1,5 @@
+# Binary Cross-Entropy Loss (default)
+# Standard BCE with logits for binary toxicity classification
+type: bce
+params:
+  reduction: mean

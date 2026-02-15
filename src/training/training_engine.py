@@ -164,6 +164,7 @@ class TrainingEngine:
         random_seed: int = 42,
         architecture: dict = None,
         tokenizer_name: str = None,
+        loss_config: dict = None,
     ) -> None:
         """
         Execute the full training pipeline.
@@ -191,6 +192,7 @@ class TrainingEngine:
             backbone_type=backbone_type,
             threshold=threshold,
             architecture=architecture,
+            loss_config=loss_config,
         )
 
         # Initialize datamodule with tokenizer
@@ -258,6 +260,7 @@ class TrainingEngine:
         threshold: float = 0.5,
         architecture: dict = None,
         tokenizer_name: str = None,
+        loss_config: dict = None,
     ) -> None:
         """
         Run inference on test set using trained model checkpoint.
@@ -300,6 +303,7 @@ class TrainingEngine:
             project_root=project_root,
             architecture=architecture,
             tokenizer_name=tokenizer_name,
+            loss_config=loss_config,
         )
 
         self.logger.info("Post-training inference completed successfully!")
@@ -391,6 +395,7 @@ def main(cfg: DictConfig) -> None:
         random_seed=cfg.random_seed,
         architecture=dict(cfg.model.architecture) if "architecture" in cfg.model else None,
         tokenizer_name=getattr(cfg.model, 'tokenizer_name', None),
+        loss_config=dict(cfg.loss) if "loss" in cfg else {'type': 'bce', 'params': {}},
     )
 
     # Run post-training inference if enabled
@@ -409,6 +414,7 @@ def main(cfg: DictConfig) -> None:
             threshold=cfg.inference.threshold,
             architecture=dict(cfg.model.architecture) if "architecture" in cfg.model else None,
             tokenizer_name=getattr(cfg.model, 'tokenizer_name', None),
+            loss_config=dict(cfg.loss) if "loss" in cfg else {'type': 'bce', 'params': {}},
         )
 
     # Finish wandb run if enabled

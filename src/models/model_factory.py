@@ -10,7 +10,7 @@ from typing import Literal, Optional, Any, Dict
 from src.models.toxicity_classifier import ToxicityClassifier
 from src.models.backbones import BertBackbone
 from src.models.backbones.custom_transformer import CustomTransformerBackbone
-
+from src.models.loss_factory import LossFactory
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +32,7 @@ class ModelFactory:
         path: Optional[str] = None,
         project_root: Optional[str] = None,
         architecture: Optional[Dict[str, Any]] = None,
+        loss_config: Optional[Dict[str, Any]] = None,
     ) -> ToxicityClassifier:
         """
         Create a toxicity classifier model for binary classification.
@@ -46,6 +47,8 @@ class ModelFactory:
             project_root: Project root directory for resolving relative paths.
             architecture: Architecture config dict for custom_transformer. Required if backbone_type="custom_transformer".
                          Contains: vocab_size, d_model, num_heads, d_ff, num_layers, dropout, classification_hidden_dim, max_len
+            loss_config: Loss function configuration dict with 'type' and 'params' keys.
+                        Only required for training. Optional for inference (defaults to None).
 
         Returns:
             ToxicityClassifier instance with the specified backbone.
@@ -94,7 +97,12 @@ class ModelFactory:
                 else:
                     logger.warning(f"Checkpoint not found at {checkpoint_path}, using random initialization")
             
-            model = ToxicityClassifier(backbone, threshold=threshold)
+            # Create loss function (optional - only needed for training)
+            loss_fn = None
+            if loss_config is not None:
+                loss_fn = LossFactory.create(loss_config)
+            
+            model = ToxicityClassifier(backbone, loss_fn=loss_fn, threshold=threshold)
             logger.info(f"Model created successfully with threshold={threshold}")
             return model
         
@@ -114,6 +122,12 @@ class ModelFactory:
         backbone_class = ModelFactory.BACKBONES[backbone_type]
         logger.info(f"Creating model with {backbone_type} backbone")
         backbone = backbone_class(model_identifier)
-        model = ToxicityClassifier(backbone, threshold=threshold)
+        
+        # Create loss function (optional - only needed for training)
+        loss_fn = None
+        if loss_config is not None:
+            loss_fn = LossFactory.create(loss_config)
+        
+        model = ToxicityClassifier(backbone, loss_fn=loss_fn, threshold=threshold)
         logger.info(f"Model created successfully with threshold={threshold}")
         return model
