@@ -2,4 +2,4 @@ data/
 outputs/
 poetry.lock
 wandb/
-**/__pycache__/
+**/__pycache__/docs/coding_task.txt
