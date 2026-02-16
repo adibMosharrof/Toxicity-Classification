@@ -1,5 +1,9 @@
 # Toxicity Classification Report
 
+**GitHub Repository:** https://github.com/siddique-d1/jigsaw
+
+---
+
 ## 1. Architecture Choice: BERT-like Encoder with Pre-LN
 
 **Pre-LN Transformer Architecture:**
@@ -37,8 +41,8 @@ Output: Toxic/Non-toxic (0-1)
 ```
 
 **Key difference from Post-LN:**
-- Pre-LN: LayerNorm → Attention → Residual (allows gradient bypass)
-- Post-LN: Attention → LayerNorm → Residual (gradient blocked by LayerNorm)
+- Pre-LN: LayerNorm → Attention → Residual
+- Post-LN: Attention → LayerNorm → Residual
 
 **Why [CLS] token for classification?**
 - Standard BERT approach: [CLS] token at sequence start aggregates full comment semantics.
