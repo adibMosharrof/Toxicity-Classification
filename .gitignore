@@ -3,3 +3,4 @@ outputs/
 poetry.lock
 wandb/
 **/__pycache__/docs/coding_task.txt
+docs/Coding_task.pdf
