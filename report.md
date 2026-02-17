@@ -1,6 +1,6 @@
 # Toxicity Classification Report
 
-**GitHub Repository:** https://github.com/siddique-d1/jigsaw
+**GitHub Repository:** https://github.com/adibMosharrof/Toxicity-Classification/tree/master
 
 ---
 

@@ -8,8 +8,7 @@ from pathlib import Path
 from typing import Literal, Optional, Any, Dict
 
 from src.models.toxicity_classifier import ToxicityClassifier
-from src.models.backbones import BertBackbone
-from src.models.backbones.custom_transformer import CustomTransformerBackbone
+from src.models.backbones import BertBackbone, PreLNTransformer
 from src.models.loss_factory import LossFactory
 
 logger = logging.getLogger(__name__)
@@ -21,7 +20,7 @@ class ModelFactory:
     # Mapping of backbone types to their classes
     BACKBONES = {
         "bert": BertBackbone,
-        "custom_transformer": CustomTransformerBackbone,
+        "custom_transformer": PreLNTransformer,
     }
 
     @staticmethod
@@ -82,7 +81,7 @@ class ModelFactory:
                     "architecture config is required for custom_transformer backbone"
                 )
             logger.info(f"Creating model with custom_transformer backbone")
-            backbone = CustomTransformerBackbone(**architecture)
+            backbone = PreLNTransformer(**architecture)
             
             # If path is provided, load the trained model weights
             if path:
@@ -92,7 +91,7 @@ class ModelFactory:
                     logger.info(f"Loading custom transformer weights from: {checkpoint_path}")
                     import torch
                     state_dict = torch.load(checkpoint_path, map_location='cpu')
-                    backbone.model.load_state_dict(state_dict)
+                    backbone.load_state_dict(state_dict)
                     logger.info("Custom transformer weights loaded successfully")
                 else:
                     logger.warning(f"Checkpoint not found at {checkpoint_path}, using random initialization")
